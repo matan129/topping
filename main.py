@@ -7,7 +7,11 @@ class Slice(object):
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-        self.score = (x2 - x1) * (y2 - y1)
+
+
+    @property
+    def score(self):
+        return (self.x2 - self.x1) * (self.y2 - self.y1)
 
     def __repr__(self):
         return '({0}, {1})=>({2}, {3})'.format(self.x1, self.y1, self.x2, self.y2)
@@ -46,10 +50,12 @@ class Pizza(object):
                     m += 1
         return t, m
 
-    def check_in_range(self, slice):
+    def check_valid(self, slice):
         if slice.x1 < 0 or slice.y1 < 0:
             return False
         if slice.x2 > self.cols or slice.y2 > self.rows:
+            return False
+        if slice.score > self.max_for_slice:
             return False
         return True
 
@@ -57,6 +63,11 @@ class Pizza(object):
         for i in xrange(slice.x1, slice.x2):
             for j in xrange(slice.y1, slice.y2):
                 pizza[j][i] = 'X'
+
+    def revert_slice(self,pizza, slice):
+        for i in xrange(slice.x1, slice.x2):
+            for j in xrange(slice.y1, slice.y2):
+                pizza[j][i] = self.toppings[j][i]
 
     def split_greedy(self, x, y, pizza_clone):
         for i in xrange(x + 1, min(x + self.max_for_slice, self.cols)):
@@ -96,28 +107,41 @@ class Pizza(object):
                 y = min_key
         return slices
 
+
+
     def extand_pizza_slice_greedy(self, slices):
+
         pizza_clone = [line[:] for line in self.toppings]
+
+        for s in slices:
+            self.draw_on_pizza(pizza_clone, s)
+
         new_slices = []
-        for slice in slices:
-            new_slice = slice
-            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+        for s in slices:
+            self.revert_slice(pizza_clone, s)
+            new_slice = s
+            while self.check_valid(new_slice) and self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2,
+                                                                      new_slice.y1, new_slice.y2) is not None:
                 new_slice.x1 -= 1
             new_slice.x1 += 1
 
-            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+            while self.check_valid(new_slice) and self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2,
+                                                                      new_slice.y1, new_slice.y2) is not None:
                 new_slice.x2 += 1
             new_slice.x2 -= 1
 
-            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+            while self.check_valid(new_slice) and self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2,
+                                                                      new_slice.y1, new_slice.y2) is not None:
                 new_slice.y1 -= 1
             new_slice.y1 += 1
 
-            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
-                new_slice.x2 += 1
-            new_slice.x2 -= 1
+            while self.check_valid(new_slice) and self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2,
+                                                                      new_slice.y1, new_slice.y2) is not None:
+                new_slice.y2 += 1
+            new_slice.y2 -= 1
 
             new_slices.append(new_slice)
+            self.draw_on_pizza(pizza_clone, new_slice)
 
         return new_slices
 
@@ -141,9 +165,12 @@ def get_pizza(pizza_path):
 
 def main():
     for pizza_name in os.listdir('Pizzas'):
+    # for pizza_name in ['example.in']:
         pizza_path = os.path.join('Pizzas', pizza_name)
         pizza = get_pizza(pizza_path)
         slices = pizza.split_all_pizza_greedy()
+        slices = pizza.extand_pizza_slice_greedy(slices)
+
         print sum(map(lambda s: s.score, slices))
         print slices
         output(slices, os.path.join('Results', pizza_name.replace('.in', '.out')))
