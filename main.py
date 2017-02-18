@@ -1,3 +1,6 @@
+import os
+
+
 class Slice(object):
     def __init__(self, x1, y1, x2, y2):
         self.x1 = x1
@@ -8,6 +11,9 @@ class Slice(object):
 
     def __repr__(self):
         return '({0}, {1})=>({2}, {3})'.format(self.x1, self.y1, self.x2, self.y2)
+
+    def __str__(self):
+        return '{0} {1} {2} {3}'.format(self.y1, self.x1, self.y2 - 1, self.x2 - 1)
 
 
 class Pizza(object):
@@ -84,20 +90,32 @@ class Pizza(object):
         return slices
 
 
-def main(pizza):
-    print pizza
-    slices = pizza.split_all_pizza_greedy()
-    print sum(map(lambda s: s.score, slices))
-    print slices
-    print 'Done'
+def output(slices, p_output):
+    lines = [str(len(slices)) + '\n']
+    for s in slices:
+        lines.append(str(s) + '\n')
+
+    with open(p_output, 'wb') as f:
+        f.writelines(lines)
 
 
-def get_pizza(name):
-    with open(r'Pizzas\\' + name) as f:
+def get_pizza(pizza_path):
+    with open(pizza_path, 'rb') as f:
         data = f.read()
     data = data.splitlines()
     return Pizza(*data[0].split(), toppings=data[1:])
 
 
+def main():
+    for pizza_name in os.listdir('Pizzas'):
+        pizza_path = os.path.join('Pizzas', pizza_name)
+        pizza = get_pizza(pizza_path)
+        slices = pizza.split_all_pizza_greedy()
+        print sum(map(lambda s: s.score, slices))
+        print slices
+        output(slices, os.path.join('Results', pizza_name.replace('.in', '.out')))
+        print 'Done'
+
+
 if __name__ == '__main__':
-    main(get_pizza('big.in'))
+    main()
