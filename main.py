@@ -1,4 +1,6 @@
 import os
+import tqdm
+import random
 
 
 class Slice(object):
@@ -7,7 +9,6 @@ class Slice(object):
         self.y1 = y1
         self.x2 = x2
         self.y2 = y2
-
 
     @property
     def score(self):
@@ -64,7 +65,7 @@ class Pizza(object):
             for j in xrange(slice.y1, slice.y2):
                 pizza[j][i] = 'X'
 
-    def revert_slice(self,pizza, slice):
+    def revert_slice(self, pizza, slice):
         for i in xrange(slice.x1, slice.x2):
             for j in xrange(slice.y1, slice.y2):
                 pizza[j][i] = self.toppings[j][i]
@@ -107,16 +108,15 @@ class Pizza(object):
                 y = min_key
         return slices
 
-
-
     def extand_pizza_slice_greedy(self, slices):
-
         pizza_clone = [line[:] for line in self.toppings]
 
         for s in slices:
             self.draw_on_pizza(pizza_clone, s)
 
         new_slices = []
+
+        random.shuffle(slices)
         for s in slices:
             self.revert_slice(pizza_clone, s)
             new_slice = s
@@ -146,7 +146,6 @@ class Pizza(object):
         return new_slices
 
 
-
 def output(slices, p_output):
     lines = [str(len(slices)) + '\n']
     for s in slices:
@@ -165,12 +164,20 @@ def get_pizza(pizza_path):
 
 def main():
     for pizza_name in os.listdir('Pizzas'):
-    # for pizza_name in ['example.in']:
+    # for pizza_name in ['medium.in']:
         pizza_path = os.path.join('Pizzas', pizza_name)
         pizza = get_pizza(pizza_path)
         slices = pizza.split_all_pizza_greedy()
-        slices = pizza.extand_pizza_slice_greedy(slices)
+        max_score = sum(map(lambda s: s.score, slices))
+        max_slice = slices
+        for i in tqdm.tqdm(xrange(100)):
+            slices_candidate = pizza.extand_pizza_slice_greedy(slices)
+            now_score = sum(map(lambda s: s.score, slices))
+            if now_score > max_score:
+                max_slice = slices_candidate
+                max_score = now_score
 
+        slices = max_slice
         print sum(map(lambda s: s.score, slices))
         print slices
         output(slices, os.path.join('Results', pizza_name.replace('.in', '.out')))
