@@ -46,6 +46,13 @@ class Pizza(object):
                     m += 1
         return t, m
 
+    def check_in_range(self, slice):
+        if slice.x1 < 0 or slice.y1 < 0:
+            return False
+        if slice.x2 > self.cols or slice.y2 > self.rows:
+            return False
+        return True
+
     def draw_on_pizza(self, pizza, slice):
         for i in xrange(slice.x1, slice.x2):
             for j in xrange(slice.y1, slice.y2):
@@ -88,6 +95,32 @@ class Pizza(object):
                         min_key = key
                 y = min_key
         return slices
+
+    def extand_pizza_slice_greedy(self, slices):
+        pizza_clone = [line[:] for line in self.toppings]
+        new_slices = []
+        for slice in slices:
+            new_slice = slice
+            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+                new_slice.x1 -= 1
+            new_slice.x1 += 1
+
+            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+                new_slice.x2 += 1
+            new_slice.x2 -= 1
+
+            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+                new_slice.y1 -= 1
+            new_slice.y1 += 1
+
+            while self.check_in_range(new_slice) or self.count_toppings(pizza_clone, new_slice.x1, new_slice.x2, new_slice.y1, new_slice.y2) is not None:
+                new_slice.x2 += 1
+            new_slice.x2 -= 1
+
+            new_slices.append(new_slice)
+
+        return new_slices
+
 
 
 def output(slices, p_output):
