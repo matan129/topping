@@ -46,10 +46,12 @@ def solve_with_subset(data, videos, final_caches):
 
     N = 0
     for r in data.requests:
-        N += r.num_requests
+        if r.video_id in videos:
+            N += r.num_requests
 
     for r in data.requests:
-        v = videos[r.video_id]
+        if r.video_id in videos:
+            v = videos[r.video_id]
         e = data.endpoints[r.endpoint_id]
         for c in e.caches.keys():
             objective.SetCoefficient(t[(v, c, e)], (r.num_requests * e.caches[c]) / N)
