@@ -5,7 +5,7 @@ from main import *
 
 def solve():
     data = Data('example')
-    solver = ps.Solver('SHA7', ps.Solver.GLOP_LINEAR_PROGRAMMING)
+    solver = ps.Solver('SHA7', ps.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
 
     y = {}
     t = {}
@@ -49,9 +49,19 @@ def solve():
             objective.SetCoefficient(t[(v, c, e)], (r.num_requests * e.caches[c]) / N)
 
     objective.SetMinimization()
-    solver.Solve()
+    assert solver.Solve() == ps.Solver.OPTIMAL
 
-    
+    from collections import defaultdict
+    final_caches = defaultdict(list)
+    for (v, c), value in y.iteritems():
+        if value.solution_value() == 1:
+            final_caches[c].append(v.id)
+
+    lines = [str(len(final_caches.keys()))]
+    for cache_id, videos in final_caches.iteritems():
+        lines.append(' '.join(map(str, [cache_id] + videos)))
+
+    print '\n'.join(lines)
     
 if __name__ == '__main__':
     solve()
