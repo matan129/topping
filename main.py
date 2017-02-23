@@ -6,8 +6,8 @@ class Video(object):
         self.id = id
         self.size = size
         self.endpoints = []
-        self.caches = set()
-        self.caches_to_latency = {}
+        self.cache_ids = set()
+        self.caches = {}
 
     def __repr__(self):
         s = '\tvideo {0} size {1}\n'.format(self.id, self.size)
@@ -16,10 +16,10 @@ class Video(object):
             s += '\t\tendpoint {0}:\n'.format(i)
             s += '\t\t' + '\n\t\t'.join(repr(e).splitlines()) + '\n'
         s += '\tcaches:\n'
-        s += '\t' + '\n\t\t'.join([repr(r) for r in self.caches])
+        s += '\t' + '\n\t\t'.join([repr(r) for r in self.cache_ids])
         s += '\n\tcaches to latency:\n'
         s += '\t\t' + '\n\t\t'.join(
-            ['{0} latency to cache server {1}'.format(l, i) for i, l in self.caches_to_latency.iteritems()])
+            ['{0} latency to cache server {1}'.format(l, i) for i, l in self.caches.iteritems()])
         return s
 
 
@@ -78,9 +78,9 @@ class Data(object):
         for v in self.videos:
             for e in v.endpoints:
                 for cache_id, latency in e.caches.iteritems():
-                    if cache_id not in v.caches:
-                        v.caches.add(cache_id)
-                        v.caches_to_latency[cache_id] = latency
+                    if cache_id not in v.cache_ids:
+                        v.cache_ids.add(cache_id)
+                        v.caches[cache_id] = latency
 
     def run(self):
         pass
