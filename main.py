@@ -7,6 +7,9 @@ class Request(object):
         self.endpoint_id = endpoint_id
         self.num_requests = num_requests
 
+    def __repr__(self):
+        return '{0} requests of video {1} to enpoint {2}'.format(self.num_requests, self.video_id, self.endpoint_id)
+
 
 class Endpoint(object):
     def __init__(self, latency_to_data_center, caches):
@@ -14,8 +17,10 @@ class Endpoint(object):
         self.caches = caches
 
     def __repr__(self):
-        s = 'latency to data center: ' + self.latency_to_data_center + '\n'
-        s += 'caches: ' + self.latency_to_data_center + '\n'
+        s = '\tlatency to data center: ' + str(self.latency_to_data_center) + '\n'
+        s += '\tcaches: '
+        s += '\n\t\t'.join(['{0} latency to cache server {1}'.format(l, i) for i, l in self.caches.iteritems()])
+        return s
 
 
 class Data(object):
@@ -37,7 +42,7 @@ class Data(object):
                 caches[cache_id] = latency_to_enpoint
             self.endpoints.append(Endpoint(latency_to_data_center, caches))
             i += num_caches
-        for i in xrange(i, i+self.num_request_descriptions):
+        for i in xrange(i, i + self.num_request_descriptions):
             self.requests.append(Request(*map(int, data[i].split())))
 
     def __repr__(self):
@@ -45,15 +50,18 @@ class Data(object):
         s += 'num cache servers: ' + str(self.num_cache_servers) + '\n'
         s += 'max cache server capacity: ' + str(self.max_cache_capacity) + '\n'
         s += 'video sizes: ' + ', '.join(map(str, self.video_sizes)) + '\n'
-        s += 'enpoints:\n'
-        s += '\n'.join([repr(e) for e in self.endpoints])
+        for i, e in enumerate(self.endpoints):
+            s += 'endpoint {0}:\n'.format(i)
+            s += repr(e) + '\n'
         s += 'requests:\n'
-        s += '\n'.join([repr(e) for e in self.requests])
-
+        s += '\n'.join(['\t' + repr(e) for e in self.requests])
+        return s
 
 
 def main():
     data = Data('example')
+    print data
+
 
 if __name__ == '__main__':
     main()
