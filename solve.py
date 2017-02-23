@@ -3,8 +3,13 @@ from ortools.linear_solver import pywraplp as ps
 from main import *
 
 
-def solve():
-    data = Data('me_at_the_zoo')
+def output(name, data):
+    with open(os.path.join('res', name + '.out')) as f:
+        f.write(data)
+
+
+def solve(name):
+    data = Data(name)
     solver = ps.Solver('SHA7', ps.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     y = {}
     t = {}
@@ -27,7 +32,7 @@ def solve():
             if c not in constraints.keys():
                 constraints[c] = solver.Constraint(0.0, data.max_cache_capacity)
             constraints[c].SetCoefficient(y[(v, c)], v.size + 0.0)
-        
+
         for e in v.endpoints:
             constraints[(e, v)] = solver.Constraint(1.0, 1.0)
             constraints[(e, v)].SetCoefficient(t[(v, e)], 1)
@@ -65,7 +70,8 @@ def solve():
     for cache_id, videos in final_caches.iteritems():
         lines.append(' '.join(map(str, [cache_id] + videos)))
 
-    print '\n'.join(lines)
-    
+    output(name, '\n'.join(lines))
+
+
 if __name__ == '__main__':
-    solve()
+    solve('me_at_the_zoo')
