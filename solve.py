@@ -9,6 +9,7 @@ def output(name, data):
         f.write(data)
 
 def solve_with_subset(data, videos, final_caches):
+    solver = ps.Solver('SHA7', ps.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     y = {}
     t = {}
     for v in videos:
@@ -69,7 +70,6 @@ def solve_with_subset(data, videos, final_caches):
 def solve(name):
     from collections import defaultdict
     data = Data(name)
-    solver = ps.Solver('SHA7', ps.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     final_caches = defaultdict(list)
     for i in xrange(0, len(data.videos) - 64, 64):
         final_caches = solve_with_subset(data, data.videos[i:i+64], final_caches)
