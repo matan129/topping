@@ -5,7 +5,7 @@ from main import *
 
 
 def output(name, data):
-    with open(os.path.join('res', name + '.out')) as f:
+    with open(os.path.join('res', name + '.out'), 'wb') as f:
         f.write(data)
 
 def solve_with_subset(data, videos, final_caches):
@@ -80,5 +80,6 @@ def solve(name):
     output(name, '\n'.join(lines))
 
 
+import sys
 if __name__ == '__main__':
-    solve('me_at_the_zoo')
+    solve(sys.argv[1])
