@@ -11,8 +11,16 @@ class Video(object):
 
     def __repr__(self):
         s = '\tvideo {0} size {1}\n'.format(self.id, self.size)
-        s += '\n\trequests: \n'
-        s += '\t\t' + '\n\t\t'.join([repr(r) for r in self.requests])
+        s += '\tendpoints:\n'
+        for i, e in enumerate(self.endpoints):
+            s += '\t\tendpoint {0}:\n'.format(i)
+            s += '\t\t' + '\n\t\t'.join(repr(e).splitlines()) + '\n'
+        s += '\tcaches:\n'
+        s += '\t' + '\n\t\t'.join([repr(r) for r in self.caches])
+        s += '\n\tcaches to latency:\n'
+        s += '\t\t' + '\n\t\t'.join(
+            ['{0} latency to cache server {1}'.format(l, i) for i, l in self.caches_to_latency.iteritems()])
+        return s
 
 
 class Request(object):
@@ -81,12 +89,13 @@ class Data(object):
         s = 'num videos: ' + str(self.num_videos) + '\n'
         s += 'num cache servers: ' + str(self.num_cache_servers) + '\n'
         s += 'max cache server capacity: ' + str(self.max_cache_capacity) + '\n'
-        s += 'video sizes: ' + ', '.join(map(str, self.video_sizes)) + '\n'
         for i, e in enumerate(self.endpoints):
             s += 'endpoint {0}:\n'.format(i)
             s += repr(e) + '\n'
         s += 'requests:\n'
         s += '\n'.join(['\t' + repr(e) for e in self.requests])
+        s += '\nvideos:\n'
+        s += '\n'.join([repr(v) for v in self.videos])
         return s
 
 
