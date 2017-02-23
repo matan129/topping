@@ -25,7 +25,7 @@ def solve():
         for c in v.caches.keys():
             if c not in constraints.keys():
                 constraints[c] = solver.Constraint(0.0, data.max_cache_capacity)
-            constraints[c].SetCoefficient(y[(v, c)], v.size)
+            constraints[c].SetCoefficient(y[(v, c)], v.size + 0.0)
         
         for e in v.endpoints:
             constraints[(e, v)] = solver.Constraint(0.0, 1.0)
@@ -49,7 +49,9 @@ def solve():
             objective.SetCoefficient(t[(v, c, e)], (r.num_requests * e.caches[c]) / N)
 
     objective.SetMinimization()
-    solver.solve()
+    solver.Solve()
+
+    
     
 if __name__ == '__main__':
     solve()

@@ -4,7 +4,7 @@ import os
 class Video(object):
     def __init__(self, id, size):
         self.id = id
-        self.size = size
+        self.size = int(size)
         self.endpoints = []
         self.cache_ids = set()
         self.caches = {}
