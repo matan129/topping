@@ -19,7 +19,8 @@ class Video(object):
         s += '\t' + '\n\t\t'.join([repr(r) for r in self.cache_ids])
         s += '\n\tcaches to latency:\n'
         s += '\t\t' + '\n\t\t'.join(
-            ['{0} latency to cache server {1}'.format(l, i) for i, l in self.caches.iteritems()])
+            ['{0} latency to cache server {1}, size {2}'.format(l, i, size) for i, (l, size) in
+             self.caches.iteritems()])
         return s
 
 
@@ -43,7 +44,8 @@ class Endpoint(object):
         s = '\tlatency to data center: ' + str(self.latency_to_data_center) + '\n'
         s += '\tcaches: \n'
         s += '\t\t' + '\n\t\t'.join(
-            ['{0} latency to cache server {1}'.format(l, i) for i, l in self.caches.iteritems()])
+            ['{0} latency to cache server {1}, size {2}'.format(l, i, size) for i, (l, size) in
+             self.caches.iteritems()])
         s += '\n\trequests: \n'
         s += '\t\t' + '\n\t\t'.join([repr(r) for r in self.requests])
         return s
@@ -65,7 +67,7 @@ class Data(object):
             caches = {}
             for j in xrange(i, i + num_caches):
                 cache_id, latency_to_enpoint = map(int, data[j].split())
-                caches[cache_id] = latency_to_enpoint
+                caches[cache_id] = (latency_to_enpoint, self.max_cache_capacity)
             self.endpoints.append(Endpoint(latency_to_data_center, caches))
             i += num_caches
         for i in xrange(i, i + self.num_request_descriptions):
