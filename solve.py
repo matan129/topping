@@ -4,22 +4,23 @@ from main import *
 
 
 def solve():
-    data = Data('example')
+    data = Data('me_at_the_zoo')
     solver = ps.Solver('SHA7', ps.Solver.CBC_MIXED_INTEGER_PROGRAMMING)
     y = {}
     t = {}
     for v in data.videos:
         for c in v.caches.keys():
-            y[(v, c)] = solver.IntVar(0.0, 1.0, 'y {0} {1}'.format(str(v), str(c)))
+            y[(v, c)] = solver.IntVar(0.0, 1.0, 'y_{0}_{1}'.format(str(v.id), str(c)))
 
         for e in v.endpoints:
             for c in e.caches.keys():
-                t[(v, c, e)] = solver.IntVar(0.0, 1.0, 't {0} {1} {2}'.format(str(v), str(c), str(e)))
-            t[(v, e)] = solver.IntVar(0.0, 1.0, 't {0} {1} D'.format(str(v), str(e)))
+                if (v, c, e) not in t:
+                    t[(v, c, e)] = solver.IntVar(0.0, 1.0, 't_{0}_{1}_{2}'.format(str(v.id), str(c), str(id(e))))
+
+            if (v, e) not in t:
+                t[(v, e)] = solver.IntVar(0.0, 1.0, 't_{0}_{1}_D'.format(str(v.id), str(id(e))))
 
     constraints = {}
-    # for c in data.caches.keys():
-    #     constraints[c] = solver.Constraint(0.0, data.max_cache_capacity)
 
     for v in data.videos:
         for c in v.caches.keys():
@@ -37,6 +38,7 @@ def solve():
                 constraints[(v, c, e)].SetCoefficient(t[(v, c, e)], 1)
                 constraints[(v, c, e)].SetCoefficient(y[(v, c)], -1)
 
+    print 'objective'
     objective = solver.Objective()
 
     N = 0
@@ -51,7 +53,7 @@ def solve():
         objective.SetCoefficient(t[(v, e)], (r.num_requests * e.latency_to_data_center) / N)
 
     objective.SetMinimization()
-    assert solver.Solve() == ps.Solver.OPTIMAL
+    print solver.Solve() == ps.Solver.OPTIMAL
 
     from collections import defaultdict
     final_caches = defaultdict(list)
